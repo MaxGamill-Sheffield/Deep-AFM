@@ -43,10 +43,10 @@ def merge_data(tracestats, splines):
         temp_dict['Splines'] = file_splines
         
         for i in range(len(tracestats['Image Name'])):
-            #print(i, tracestats['Image Name'])
             if tracestats['Image Name'][str(i)] == filename:
-                temp_dict['Circular'][str(i+1)] = tracestats['Circular'][str(i)]
-                temp_dict['Contour Lengths'][str(i+1)] = tracestats['Contour Lengths'][str(i)]
+                mol_num = tracestats['Molecule number'][str(i)]
+                temp_dict['Circular'][str(mol_num+1)] = tracestats['Circular'][str(i)]
+                temp_dict['Contour Lengths'][str(mol_num+1)] = tracestats['Contour Lengths'][str(i)]
             else:
                 pass
         new_dict[filename] = temp_dict
