@@ -47,17 +47,17 @@ def save_modified_array_files(array_dict, path, ext):
         array_rot90 = rotate(array)
         array_rot180 = rotate(array_rot90)
         array_rot270 = rotate(array_rot180)
-        
+        fname, rest = key.split('_',1)
         if ext == '.png':
             imageio.imsave(path+key+'.png', array)
-            imageio.imsave(path+key+'_rotate90.png', array_rot90)
-            imageio.imsave(path+key+'_rotate180.png', array_rot180)
-            imageio.imsave(path+key+'_rotate270.png', array_rot270)
+            imageio.imsave(path+fname+'-rot-90_'+rest+'.png', array_rot90)
+            imageio.imsave(path+fname+'-rot-180_'+rest+'.png', array_rot180)
+            imageio.imsave(path+fname+'-rot-270_'+rest+'.png', array_rot270)
         elif ext == '.txt':
             np.savetxt(path+key+'.txt', array)
-            np.savetxt(path+key+'_rotate90.txt', array_rot90)
-            np.savetxt(path+key+'_rotate180.txt', array_rot180)
-            np.savetxt(path+key+'_rotate270.txt', array_rot270)
+            np.savetxt(path+fname+'-rot-90_'+rest+'.txt', array_rot90)
+            np.savetxt(path+fname+'-rot-180_'+rest+'.txt', array_rot180)
+            np.savetxt(path+fname+'-rot-270_'+rest+'.txt', array_rot270)
         else:
             print("Only png and txt files can be made at this time")
 
@@ -100,13 +100,13 @@ def add_spline_rotations(full_dict):
         spline_rot_dict = spline_rotations(full_dict[fname]['Splines'], pixel_size=1024)
         param_dict = full_dict[fname].copy()
         
-        full_dict_cp[fname+'_rot_90'] = param_dict.copy()
-        full_dict_cp[fname+'_rot_180'] = param_dict.copy()
-        full_dict_cp[fname+'_rot_270'] = param_dict.copy()
+        full_dict_cp[fname+'-rot-90'] = param_dict.copy()
+        full_dict_cp[fname+'-rot-180'] = param_dict.copy()
+        full_dict_cp[fname+'-rot-270'] = param_dict.copy()
         
-        full_dict_cp[fname+'_rot_90']['Splines'] = spline_rot_dict['rot_90']
-        full_dict_cp[fname+'_rot_180']['Splines'] = spline_rot_dict['rot_180']
-        full_dict_cp[fname+'_rot_270']['Splines'] = spline_rot_dict['rot_270']
+        full_dict_cp[fname+'-rot-90']['Splines'] = spline_rot_dict['rot_90']
+        full_dict_cp[fname+'-rot-180']['Splines'] = spline_rot_dict['rot_180']
+        full_dict_cp[fname+'-rot-270']['Splines'] = spline_rot_dict['rot_270']
     
     return full_dict_cp
 
@@ -115,7 +115,7 @@ def add_spline_rotations(full_dict):
 ts_path = "/Users/Maxgamill/Desktop/Uni/PhD/TopoStats/data/"
 new_path = "/Users/Maxgamill/Desktop/Uni/PhD/Project/Data/"
 
-img_dict = import_files(ts_path+'processed/', '.png')
+img_dict = import_files(ts_path+'Processed/', '.png')
 grain_dict = import_files(ts_path, '.txt')
 
 with open(new_path+"JSONs/434_PLL_REL_minicircles.json") as file:
