@@ -8,7 +8,10 @@ The helper scripts are designed to assisst in the pre-preporcessing pipeline and
 3) (transform_checker.py) Visualises the splines and grain heatmaps ontop of one another to ensure they match correctly.
 
 The benefit of the new file format is that each image is linked by their name whether it's a:
-png:    <name>_<channel>_<colour>.png
-grains: <name>_grains_<rotation>.txt
-json:   {<name>: {Circular: ..., Contour Length: ..., Splines: ...}}
+<br>
+png:    `<name>_<channel>_<colour>.png`
+<br>
+grains: `<name>_grains_<rotation>.txt`
+<br>
+json:   `{<name>: {Circular: ..., Contour Length: ..., Splines: ...}}`
 
