@@ -60,10 +60,10 @@ save_path = "/Users/Maxgamill/Desktop/Uni/PhD/Project/Data/JSONs/"
 tracestats = read_json(ts_path + 'tracestats.json')
 splines = get_spline_jsons(ts_path + 'data/')
 
-final_json = merge_data(tracestats, splines)
+merged_json = merge_data(tracestats, splines)
 
 with open(save_path+'434_PLL_REL_minicircles.json', 'w') as save_file:
-    json.dump(final_json, save_file)
+    json.dump(merged_json, save_file)
 
 
 
