@@ -64,11 +64,3 @@ merged_json = merge_data(tracestats, splines)
 
 with open(save_path+'434_PLL_REL_minicircles.json', 'w') as save_file:
     json.dump(merged_json, save_file)
-
-
-
-
-
-
-
-
