@@ -37,10 +37,12 @@ def merge_data(tracestats, splines):
     for filename in splines.keys():
         temp_dict = {'Splines': {},
                      'Circular': {},
-                     'Contour Lengths': {}
+                     'Contour Lengths': {},
+                     'Image Parameters': {}
                      }
         file_splines = splines[filename]
-        temp_dict['Splines'] = file_splines
+        temp_dict['Splines'] = file_splines['Splines']
+        temp_dict['Image Parameters'] = file_splines['Img_params']
         
         for i in range(len(tracestats['Image Name'])):
             if tracestats['Image Name'][str(i)] == filename:
