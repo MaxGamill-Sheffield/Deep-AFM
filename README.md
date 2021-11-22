@@ -14,6 +14,7 @@ png:    `<name+transform>_<channel>_<colour>.png`
 grains: `<name+transform>_grains.txt`
 <br>
 json: `<name+transform>_spline.json`
+<br>
 json format:   `{<name>: {Circular: ..., Contour Length: ..., Splines: ...}}`
 <br>
 And so all grains, images and info contained in JSONs can be gathered via the `<name>` of the file (a.k.a the json first-leyer keys) as they are consistent between all objects.
