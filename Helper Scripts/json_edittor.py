@@ -20,7 +20,7 @@ def get_spline_jsons(path):
         if not(file.endswith('.json')):
             filelist.remove(file)
         else:
-            name = file.split('_')[0]
+            name = file.split('_spline')[0]
             data = read_json(path + file)
             spline_dict[name] = data
     return spline_dict
@@ -64,5 +64,5 @@ splines = get_spline_jsons(ts_path + 'data/')
 
 merged_json = merge_data(tracestats, splines)
 
-with open(save_path+'434_PLL_REL_minicircles.json', 'w') as save_file:
+with open(save_path+'relaxed_minicircles.json', 'w') as save_file:
     json.dump(merged_json, save_file)
