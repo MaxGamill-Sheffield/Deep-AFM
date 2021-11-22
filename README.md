@@ -9,11 +9,12 @@ The helper scripts are designed to assisst in the pre-preporcessing pipeline and
 
 The benefit of the new file format is that each image is linked by their name whether it's a:
 <br>
-png:    `<name>_<channel>_<colour>.png`
+png:    `<name+transform>_<channel>_<colour>.png`
 <br>
-grains: `<name>_grains_<rotation>.txt`
+grains: `<name+transform>_grains.txt`
 <br>
-json:   `{<name>: {Circular: ..., Contour Length: ..., Splines: ...}}`
+json: `<name+transform>_spline.json`
+json format:   `{<name>: {Circular: ..., Contour Length: ..., Splines: ...}}`
 <br>
 And so all grains, images and info contained in JSONs can be gathered via the `<name>` of the file (a.k.a the json first-leyer keys) as they are consistent between all objects.
 
