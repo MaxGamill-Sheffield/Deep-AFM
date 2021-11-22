@@ -41,25 +41,28 @@ def rotate(img_array):
     return np.flip(img_array.T, axis=1)
 
 
-def save_modified_array_files(array_dict, path, ext):
-    for key in array_dict.keys():
-        array = array_dict[key]
+def save_modified_array_files(array_dict, path_out, ftype):
+    for fname in array_dict.keys():
+        array = array_dict[fname]
         array_rot90 = rotate(array)
         array_rot180 = rotate(array_rot90)
         array_rot270 = rotate(array_rot180)
-        fname, rest = key.split('_',1)
-        if ext == '.png':
-            imageio.imsave(path+key+'.png', array)
-            imageio.imsave(path+fname+'-rot-90_'+rest+'.png', array_rot90)
-            imageio.imsave(path+fname+'-rot-180_'+rest+'.png', array_rot180)
-            imageio.imsave(path+fname+'-rot-270_'+rest+'.png', array_rot270)
-        elif ext == '.txt':
-            np.savetxt(path+key+'.txt', array)
-            np.savetxt(path+fname+'-rot-90_'+rest+'.txt', array_rot90)
-            np.savetxt(path+fname+'-rot-180_'+rest+'.txt', array_rot180)
-            np.savetxt(path+fname+'-rot-270_'+rest+'.txt', array_rot270)
+        if ftype == '.png':
+            # <name+transform>_<channel>_<colour>.png
+            label = fname.split('_',len(fname.split('_'))-3)[-1]
+            name = fname.split('_'+label)[0]
+            imageio.imsave(path_out+fname+'.png', array)
+            imageio.imsave(path_out+name+'-rot-90_'+label+'.png', array_rot90)
+            imageio.imsave(path_out+name+'-rot-180_'+label+'.png', array_rot180)
+            imageio.imsave(path_out+name+'-rot-270_'+label+'.png', array_rot270)
+        elif ftype == '.txt':
+            name = fname[:-7] # <name>
+            np.savetxt(path_out+fname+'.txt', array)
+            np.savetxt(path_out+name+'-rot-90_grains.txt', array_rot90)
+            np.savetxt(path_out+name+'-rot-180_grains.txt', array_rot180)
+            np.savetxt(path_out+name+'-rot-270_grains.txt', array_rot270)
         else:
-            print("Only png and txt files can be made at this time")
+            print("Only png and txt files can be made at this time: ", fname)
 
 def spline_rotations(spline_dict, pixel_size):
     '''
@@ -118,13 +121,13 @@ new_path = "/Users/Maxgamill/Desktop/Uni/PhD/Project/Data/"
 img_dict = import_files(ts_path+'Processed/', '.png')
 grain_dict = import_files(ts_path, '.txt')
 
-with open(new_path+"JSONs/434_PLL_REL_minicircles.json") as file:
+with open(new_path+"JSONs/relaxed_minicircles.json") as file:
     full_dict = json.load(file)
 
 save_modified_array_files(img_dict, new_path+'Images/', '.png')
 save_modified_array_files(grain_dict, new_path+'Segmentations/', '.txt')
 
-with open(new_path+"JSONs/434_PLL_REL_minicircles_withrotations.json", 'w') as file:
+with open(new_path+"JSONs/relaxed_minicircles_withrotations.json", 'w') as file:
     full_dict_cp = add_spline_rotations(full_dict)
     json.dump(full_dict_cp, file)
 
