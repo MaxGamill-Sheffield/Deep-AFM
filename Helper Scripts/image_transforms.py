@@ -9,7 +9,7 @@ Created on Tue Nov  9 15:30:13 2021
 import numpy as np
 import imageio
 import os
-import json
+
 
 '''
 Module for importing images and creating more by rotations
@@ -123,7 +123,7 @@ def spline_transformations(spline_dict, pixel_size):
         
     return spline_trans_dict
 
-def add_spline_rotations(full_dict):
+def add_spline_translations(full_dict):
     '''
     Want to pass through the full dict and append to it new
      values which are the rotations.
@@ -155,22 +155,5 @@ def add_spline_rotations(full_dict):
     
     return full_dict_cp
 
-
-
-ts_path = "/Users/Maxgamill/Desktop/Uni/PhD/TopoStats/data/"
-new_path = "/Users/Maxgamill/Desktop/Uni/PhD/Project/Data/"
-
-img_dict = import_files(ts_path+'Processed/', '.png')
-grain_dict = import_files(ts_path, '.txt')
-
-with open(new_path+"JSONs/test.json") as file:
-    full_dict = json.load(file)
-
-save_modified_array_files(img_dict, new_path+'Images/', '.png')
-save_modified_array_files(grain_dict, new_path+'Segmentations/', '.txt')
-
-with open(new_path+"JSONs/test_transforms.json", 'w') as file:
-    full_dict_cp = add_spline_rotations(full_dict)
-    json.dump(full_dict_cp, file)
 
 
