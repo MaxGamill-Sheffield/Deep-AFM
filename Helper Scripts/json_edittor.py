@@ -64,7 +64,7 @@ splines = get_spline_jsons(ts_path + 'data/')
 
 merged_json = merge_data(tracestats, splines)
 
-with open(save_path+'relaxed_minicircles.json', 'w') as save_file:
+with open(save_path+'test.json', 'w') as save_file:
     json.dump(merged_json, save_file)
 
 
