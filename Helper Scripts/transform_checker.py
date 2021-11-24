@@ -12,12 +12,14 @@ import matplotlib.pyplot as plt
 proj = '/Users/Maxgamill/Desktop/Uni/PhD/Project/Data/'
 json_file = '/Users/Maxgamill/Desktop/Uni/PhD/Project/Data/JSONs/'
 
-grains = np.loadtxt(proj + 'Segmentations/minicircle.spm_grains_rotate90.txt')
-#grains = np.reshape(grains, [int(np.sqrt(grains.size)),int(np.sqrt(grains.size))])
-with open(json_file + '434_PLL_REL_minicircles_withrotations.json') as file:
+name = 'minicircle.spm'
+grains = np.loadtxt(proj + 'Segmentations/' + name + '_grains.txt')
+
+with open(json_file + 'test_transforms.json') as file:
     full_dict = json.load(file)
 
 def overlay(grains, splines_dict):
+    
     plt.figure(figsize=(6.0,6.0))
     plt.title('Showing: All')
 
@@ -29,11 +31,12 @@ def overlay(grains, splines_dict):
         spline = splines_dict[str(i)]
         plt.plot(spline['x_coord'], spline['y_coord'],label=str(i))
         plt.legend(loc='best')
-        plt.savefig('all_spline_overlay_for_all.png')
+        plt.title(name)
+        #plt.savefig('all_spline_overlay_for_all.png')
         
 
 
-overlay(grains, full_dict['minicircle.spm_rot_90']['Splines'])    
+overlay(grains, full_dict[name]['Splines'])    
     
     
     
