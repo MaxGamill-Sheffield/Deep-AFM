@@ -76,10 +76,3 @@ with open(json_path+"relaxed_minicircles.json", 'w') as file:
     full_dict_cp = it.add_spline_translations(merged_json)
     json.dump(full_dict_cp, file)
 
-
-
-
-
-
-
-
