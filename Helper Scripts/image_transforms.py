@@ -131,7 +131,8 @@ def add_spline_rotations(full_dict):
     full_dict_cp = full_dict.copy()
     original_filenames = list(full_dict.keys())
     for fname in original_filenames:
-        spline_trans_dict = spline_transformations(full_dict[fname]['Splines'], pixel_size=1024)
+        spline_trans_dict = spline_transformations(full_dict[fname]['Splines'], full_dict[fname]['Image Parameters']['x_px'])
+        
         param_dict = full_dict[fname].copy()
         
         full_dict_cp[fname+'-rot-90'] = param_dict.copy()
