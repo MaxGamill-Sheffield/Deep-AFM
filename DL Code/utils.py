@@ -10,54 +10,124 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
+import json
 
 class graphical():
     
-    def show_img(image, spline_coords, grains):
+    def show_overlays(image, grain, spline_df, single=0, save=0):
         '''
-        Shows an overlay of the image and splines, and grains and splines.
+        Takes an image, its backbones and segmentation and plots 2 graphs.
+        An image-spline graph and a grain-spline graph.
 
         Parameters
         ----------
-        image : TYPE
-            DESCRIPTION.
-        splines_coords : TYPE
-            DESCRIPTION.
-        grains : numpy.ndarray
-            An NxN array with pixel lables matching that of the README.
+        image : scikit.io image
+            An image file loaded with scikit.io.
+        spline_df : pandas DataFrame
+            A pandas DataFrame with columns of the molecule number, an array
+            of x coords and and array of y coords.
+        grain : ndarrray.
+            A NxN numoy array with 0 as the background and integers related to
+            the molecule number.
+        single : int
+            An integer between 0 and len(spline_df) which will correspond to
+            a molecule number in the data. The default is 0 meaning that a
+            single molecule is not selected.
+        save : String, optional
+            A path to save the produced graph to. The default is 0 which
+            means no file is saved.
 
         Returns
         -------
         None.
-        
+
         '''
-        # Make a copy of grains as not to edit the original one
-        grains_copy = np.zeros(grains.shape) + grains
-        # Highlight all found grains
-        grains_copy[grains_copy!=0] = 255
+        if single==0:
+            plot_no = 2
+        else:
+            print('Molecule %i of %i chosen' %(single,len(spline_df)))
+            plot_no = 3
+            grain_copy = np.zeros(grain.shape) + grain
+            grain_copy[grain_copy==single]=255
         
-        ax1 = plt.subplot(121)
-        ax1.plot(spline_coords[0], spline_coords[1]) #needs label
-        plt.imshow(image)
+        # Create subplots for image and grain graphs
+        fig, ax = plt.subplots(1,plot_no)
+        ax[0].set_title('Image and Splines')
+        ax[0].imshow(image, cmap='gray')
+        ax[0].axis('off')
+        ax[1].set_title('All Masks and Splines')
+        ax[1].imshow(grain)
+        ax[1].axis('off')
         
-        ax2 = plt.subplot(122)
-        ax2.plot(spline_coords[0], spline_coords[1]) #needs label
-        plt.imgshow(grains)
+        # Plot the splines on the subplots
+        for mol_num in range(len(spline_df)):
+            ax[0].plot(spline_df['x'][mol_num], spline_df['y'][mol_num],
+                     label = int(mol_num)+1)
+            ax[1].plot(spline_df['x'][mol_num], spline_df['y'][mol_num],
+                     label = int(mol_num)+1)
+            # Plot single grain and spline graph
+            if single!=0 and mol_num==single-1:
+                ax[2].set_title('Mask %i and Spline' %(single))
+                ax[2].imshow(grain_copy)
+                ax[2].plot(spline_df['x'][mol_num], spline_df['y'][mol_num],
+                         label = int(mol_num)+1)
+                ax[2].axis('off')
+                
+        # Show legend
+        ax[0].legend(loc='center right', bbox_to_anchor=(0, 0.5))
         
-        plt.show()
+        # Save the figure to the path specified
+        if save != 0:
+            plt.savefig(save)
+            
         
-class data():
+class df_it():
+    '''Converts data to more accessable and usable dataframes'''
     
-    def load_grains(grains_path):
-        filelist = os.listdir(grains_path)
-        df = pd.DataFrame([], columns=('Image Name','Image Path','Grains'))
+    def get_img_params(json_dict):
         '''
-        for file in filelist:
-            grain = np.loadtxt(grains_path+file)
-            df.append(file.split('_grains')[0], grains_path+file)
+        Takes the dictionary produced by the helper script and turns the
+        image information into a pandas dataframe. Can use obj.head() to
+        check the columns and examples.
+
+        Parameters
+        ----------
+        json_dict : Dictionary
+            A python dictionary produced by the helper scripts. Formatted 
+            according to the README.
+
+        Returns
+        -------
+        df : pandas DataFrame
+            Formatted by columns of the dictionary keys, the matching image
+            and grain files, and x/y pixel/length information.
+
         '''
-        df = pd.concat([pd.DataFrame([[file.split('_grains')[0], grains_path+file]],
-                                     columns=['Image Name','Image Path']) for file in filelist],
-                       ignore_index=True)
+        
+        df_cols = ['Name','Image Name','Grain Name','x_px','y_px','x_real','y_real']
+        df = pd.concat([pd.DataFrame([[keys,keys+'_ZSensor_processed_grey.png',keys+'_grains.txt',
+                                      json_dict[keys]['Image Parameters']['x_px'],
+                                      json_dict[keys]['Image Parameters']['y_px'],
+                                      json_dict[keys]['Image Parameters']['x_len'],
+                                      json_dict[keys]['Image Parameters']['y_len']]],
+                                     columns=df_cols) for keys in json_dict.keys()], ignore_index=True)
         return df
+            
+    
+    def get_splines(spline_dict):
+        df_cols = ['Molecule Number','x','y']
+        df = pd.concat([pd.DataFrame([[mol_num,
+                                      np.asarray(spline_dict[mol_num]['x_coord']),
+                                      np.asarray(spline_dict[mol_num]['y_coord'])]],
+                                     columns=df_cols) for mol_num in spline_dict.keys()], ignore_index=True)
+        return df
+            
+            
+            
+            
+            
+            
+            
+            
+            
         

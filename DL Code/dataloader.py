@@ -11,12 +11,14 @@ import json
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
-import utils as uv
+import utils
+import os.path
+from skimage import io
 
 
 class dataLoaderSegmentation(Dataset):
     
-    def __init__(self, images_path, json_path, grains_path):
+    def __init__(self, images_path, json_path, grains_path, transform=None):
         '''
         Initialises the dataloader class by compiling the image, json and grain
          data together.
@@ -35,34 +37,45 @@ class dataLoaderSegmentation(Dataset):
         None.
 
         '''
-        super(dataLoaderSegmentation, self).__init__()
+
         # load json file
         with open(json_path) as file:
             self.data_dict = json.load(file)
-        # load txt files
+        # set get image parameter dataframe
+        self.img_params = utils.df_it.get_img_params(self.data_dict)
+        # set image and grain paths
         self.img_path = images_path
-        self.grains = uv.data.load_grains(grains_path)
+        self.grains_path = grains_path
+        self.transform = transform
         
     def __len__(self):
-        return len(self.data_dict)
+        return len(self.img_params)
         
     def __getitem__(self, idx):
-        '''
-            if torch.is_tensor(idx):
-                idx = idx.tolist()
         
-            img_name = os.path.join(self.root_dir,
-                                    self.landmarks_frame.iloc[idx, 0])
-            image = io.imread(img_name)
-            landmarks = self.landmarks_frame.iloc[idx, 1:]
-            landmarks = np.array([landmarks])
-            landmarks = landmarks.astype('float').reshape(-1, 2)
-            sample = {'image': image, 'landmarks': landmarks}
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
         
-            if self.transform:
-                sample = self.transform(sample)
-        '''
-        return idx
+        # Get image
+        img_name = os.path.join(self.img_path, self.img_params.iloc[idx, 1])
+        image = io.imread(img_name)
+        
+        # Get grain
+        grain_name = os.path.join(self.grains_path, self.img_params.iloc[idx, 2])
+        grain = np.loadtxt(grain_name) 
+        
+        # Get spline
+        key = self.img_params.iloc[idx, 0]
+        spline_df = utils.df_it.get_splines(self.data_dict[key]['Splines'])
+    
+        # Compile into dictionary as a "sample"
+        sample = {'Image': image, 'Grain': grain, 'Splines': spline_df}
+        
+        # Compute transofrms
+        if self.transform:
+            sample = self.transform(sample)
+        
+        return sample
         
     
 path = "/Users/Maxgamill/Desktop/Uni/PhD/Project/Data/"
