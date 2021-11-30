@@ -74,11 +74,11 @@ class dataLoaderSegmentation(Dataset):
         
         # Get image
         img_name = os.path.join(self.img_path, self.img_params.iloc[idx, 1])
-        image = io.imread(img_name)
+        image = io.imread(img_name).astype('float64')
         
         # Get grain
         grain_name = os.path.join(self.grains_path, self.img_params.iloc[idx, 2])
-        grain = np.loadtxt(grain_name) 
+        grain = np.loadtxt(grain_name, dtype='int8')
         
         # Get spline
         key = self.img_params.iloc[idx, 0]

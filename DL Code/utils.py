@@ -48,7 +48,7 @@ class graphical():
         if single==0:
             plot_no = 2
         else:
-            assert type(single)==int and single<=tot_mols and single>=0,\
+            assert isinstance(single,int) and single<=tot_mols and single>=0,\
             "`single` should be an integer <= %i." %tot_mols
             plot_no = 3
             grain_copy = np.zeros(grain.shape) + grain
