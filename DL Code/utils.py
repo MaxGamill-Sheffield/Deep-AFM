@@ -13,15 +13,17 @@ import pandas as pd
 import json
 
 class graphical():
+    ''' Contains all graph producing functions'''
     
     def show_overlays(image, grain, spline_df, single=0, save=0):
         '''
-        Takes an image, its backbones and segmentation and plots 2 graphs.
-        An image-spline graph and a grain-spline graph.
+        Takes an image, its backbones and segmentation and plots 2 or 3
+            graphs - An image-spline graph, and a single/multi grain-spline 
+            graph.
 
         Parameters
         ----------
-        image : scikit.io image
+        image : ndarray
             An image file loaded with scikit.io.
         spline_df : pandas DataFrame
             A pandas DataFrame with columns of the molecule number, an array
@@ -30,10 +32,9 @@ class graphical():
             A NxN numoy array with 0 as the background and integers related to
             the molecule number.
         single : int
-            An integer between 0 and len(spline_df) which will correspond to
-            a molecule number in the data. The default is 0 meaning that a
-            single molecule is not selected.
-        save : String, optional
+            An integer label of the molecule number in the data. The default 
+            is 0 meaning that a single molecule is not selected.
+        save : str, optional
             A path to save the produced graph to. The default is 0 which
             means no file is saved.
 
@@ -42,10 +43,13 @@ class graphical():
         None.
 
         '''
+        tot_mols = len(spline_df)
+        
         if single==0:
             plot_no = 2
         else:
-            print('Molecule %i of %i chosen' %(single,len(spline_df)))
+            assert type(single)==int and single<=tot_mols and single>=0,\
+            "`single` should be an integer <= %i." %tot_mols
             plot_no = 3
             grain_copy = np.zeros(grain.shape) + grain
             grain_copy[grain_copy==single]=255
@@ -60,7 +64,7 @@ class graphical():
         ax[1].axis('off')
         
         # Plot the splines on the subplots
-        for mol_num in range(len(spline_df)):
+        for mol_num in range(tot_mols):
             ax[0].plot(spline_df['x'][mol_num], spline_df['y'][mol_num],
                      label = int(mol_num)+1)
             ax[1].plot(spline_df['x'][mol_num], spline_df['y'][mol_num],
@@ -87,12 +91,12 @@ class df_it():
     def get_img_params(json_dict):
         '''
         Takes the dictionary produced by the helper script and turns the
-        image information into a pandas dataframe. Can use obj.head() to
-        check the columns and examples.
+            image information into a pandas dataframe. Can use obj.head() to
+            check the columns and examples.
 
         Parameters
         ----------
-        json_dict : Dictionary
+        json_dict : dict
             A python dictionary produced by the helper scripts. Formatted 
             according to the README.
 
@@ -115,6 +119,21 @@ class df_it():
             
     
     def get_splines(spline_dict):
+        '''
+        Gets splines created from the helper script dictionary and puts them
+            into a dataframe for easy access.
+
+        Parameters
+        ----------
+        spline_dict : dict
+            The spline dictionary created from the helper script.
+
+        Returns
+        -------
+        df : pandas DataFrame
+            Formatted by molecule number, x coordinates and y coordinates.
+
+        '''
         df_cols = ['Molecule Number','x','y']
         df = pd.concat([pd.DataFrame([[mol_num,
                                       np.asarray(spline_dict[mol_num]['x_coord']),

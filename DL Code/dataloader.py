@@ -49,10 +49,26 @@ class dataLoaderSegmentation(Dataset):
         self.transform = transform
         
     def __len__(self):
+        ''' Gets the length of the dataset '''
         return len(self.img_params)
         
     def __getitem__(self, idx):
-        
+        '''
+        Accepts an index and returns labels and data for that index of the 
+            data loader.
+
+        Parameters
+        ----------
+        idx : int
+            The index number of the data in the dataset.
+
+        Returns
+        -------
+        sample : dict
+            A sample of the image, grain for that image and splines of the
+                molecules in that image.
+
+        '''
         if torch.is_tensor(idx):
             idx = idx.tolist()
         
