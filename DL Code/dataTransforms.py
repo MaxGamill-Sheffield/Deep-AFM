@@ -5,7 +5,7 @@ Created on Mon Nov 29 16:21:45 2021
 
 @author: Maxgamill
 """
-import numpy as np
+
 from skimage import transform
 import torch
 
@@ -43,9 +43,10 @@ class Rescale(object):
         # rescale image and grains
         img = transform.resize(image, (new_h, new_w))
         grains = transform.resize(grain, (new_h, new_w))
-        # rescale splines while getting around chain linking issue (via copies)
-        xy_slice = splines.iloc[:,1:].copy()
-        splines.iloc[:,1:] = xy_slice * [new_h / h, new_w / w]
+        # rescale splines
+        for mol_num in splines.keys():
+            splines[mol_num]['x_coord'] = splines[mol_num]['x_coord'] * new_h / h
+            splines[mol_num]['x_coord'] = splines[mol_num]['x_coord'] * new_w / w
         
         sample = {'Image': img, 'Grain': grains, 'Splines': splines}
         
@@ -63,11 +64,9 @@ class ToTensor(object):
         # -> Will have to add channel input/selection too when using multiple channels.
         #image = image.transpose((2,0,1)) ...
         
-        for i in range(len(splines)):
-            x = splines.iloc[i,1]
-            y = splines.iloc[i,2]
-            splines.iloc[i,1] = torch.tensor(x)
-            splines.iloc[i,2] = torch.tensor(y)
+        for mol_num in splines.keys():
+            splines[mol_num]['x_coord'] = torch.tensor(splines[mol_num]['x_coord'])
+            splines[mol_num]['y_coord'] = torch.tensor(splines[mol_num]['y_coord'])
         
         sample  ={'Image': torch.from_numpy(image),
                    'Grain': torch.from_numpy(grain), 'Splines': splines}

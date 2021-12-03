@@ -81,10 +81,13 @@ class SegmentationData(Dataset):
         
         # Get spline
         key = self.img_params.iloc[idx, 0]
-        spline_df = utils.df_it.get_splines(self.data_dict[key]['Splines'])
-    
+        spline_dict = self.data_dict[key]['Splines']
+        for mol_num in spline_dict:
+            spline_dict[mol_num]['x_coord'] = np.asarray(spline_dict[mol_num]['x_coord'])
+            spline_dict[mol_num]['y_coord'] = np.asarray(spline_dict[mol_num]['y_coord'])
+            
         # Compile into dictionary as a "sample"
-        sample = {'Image': image, 'Grain': grain, 'Splines': spline_df}
+        sample = {'Image': image, 'Grain': grain, 'Splines': spline_dict}
         
         # Compute transforms
         if self.transform:

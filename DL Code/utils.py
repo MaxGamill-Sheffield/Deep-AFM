@@ -146,29 +146,7 @@ class df_it():
                                      columns=df_cols) for keys in json_dict.keys()], ignore_index=True)
         return df
             
-    
-    def get_splines(spline_dict):
-        '''
-        Gets splines created from the helper script dictionary and puts them
-            into a dataframe for easy access.
 
-        Parameters
-        ----------
-        spline_dict : dict
-            The spline dictionary created from the helper script.
-
-        Returns
-        -------
-        df : pandas DataFrame
-            Formatted by molecule number, x coordinates and y coordinates.
-
-        '''
-        df_cols = ['Molecule Number','x','y']
-        df = pd.concat([pd.DataFrame([[mol_num,
-                                      np.asarray(spline_dict[mol_num]['x_coord']),
-                                      np.asarray(spline_dict[mol_num]['y_coord'])]],
-                                     columns=df_cols) for mol_num in spline_dict.keys()], ignore_index=True)
-        return df
             
             
             
