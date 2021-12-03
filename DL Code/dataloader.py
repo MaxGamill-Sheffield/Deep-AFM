@@ -9,14 +9,13 @@ Created on Wed Nov 24 14:47:23 2021
 import torch
 import json
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
+from torch.utils.data import Dataset
 import utils
 import os.path
 from skimage import io
 
 
-class dataLoaderSegmentation(Dataset):
+class SegmentationData(Dataset):
     
     def __init__(self, images_path, json_path, grains_path, transform=None):
         '''
@@ -87,13 +86,11 @@ class dataLoaderSegmentation(Dataset):
         # Compile into dictionary as a "sample"
         sample = {'Image': image, 'Grain': grain, 'Splines': spline_df}
         
-        # Compute transofrms
+        # Compute transforms
         if self.transform:
             sample = self.transform(sample)
         
         return sample
         
     
-path = "/Users/Maxgamill/Desktop/Uni/PhD/Project/Data/"
 
-data = dataLoaderSegmentation(images_path=str(path+'Images/'), json_path=str(path+'JSONs/relaxed_minicircles.json'), grains_path=str(path+'/Segmentations/'))

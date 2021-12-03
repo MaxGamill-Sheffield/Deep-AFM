@@ -11,6 +11,7 @@ import numpy as np
 import os
 import pandas as pd
 import json
+from torchvision import utils
 
 class graphical():
     ''' Contains all graph producing functions'''
@@ -43,6 +44,7 @@ class graphical():
         None.
 
         '''
+        
         tot_mols = len(spline_df)
         
         if single==0:
@@ -83,7 +85,34 @@ class graphical():
         # Save the figure to the path specified
         if save != 0:
             plt.savefig(save)
-            
+        
+    def show_batch(sample_batched):
+        
+        images_batch, grains_batch, spline_batch = \
+            sample_batched['Image'], sample_batched['Grain'], sample_batched['Splines']
+        batch_size = len(images_batch)
+        im_size = images_batch.size(2)
+        
+        fig, ax = plt.subplots(2,1)
+        
+        grid = utils.make_grid(images_batch)
+        ax[0].imshow(grid.numpy().transpose((1, 2, 0)))
+        grid2 = utils.make_grid(grains_batch)
+        ax[1].imshow(grid2.numpy().transpose((1, 2, 0)))
+
+        for i in range(spline_batch):
+            ### needs adjusting for xy
+            plt.scatter(spline_batch[i, :, 0].numpy() + i * im_size,
+                    spline_batch[i, :, 1].numpy(),
+                    s=10, marker='.', c='r')
+        
+
+
+            plt.title('Batch from dataloader')
+        
+        
+        
+        plt.title('Batch from dataloader')
         
 class df_it():
     '''Converts data to more accessable and usable dataframes'''
