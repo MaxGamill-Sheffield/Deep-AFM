@@ -10,7 +10,7 @@ import torch
 import json
 import numpy as np
 from torch.utils.data import Dataset
-import utils
+import maxUtils as mtils
 import os.path
 from skimage import io
 
@@ -41,7 +41,7 @@ class SegmentationData(Dataset):
         with open(json_path) as file:
             self.data_dict = json.load(file)
         # set get image parameter dataframe
-        self.img_params = utils.df_it.get_img_params(self.data_dict)
+        self.img_params = mtils.df_it.get_img_params(self.data_dict)
         # set image and grain paths
         self.img_path = images_path
         self.grains_path = grains_path

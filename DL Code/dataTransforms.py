@@ -40,13 +40,13 @@ class Rescale(object):
         
         # ensure pixel sizes are integers
         new_h, new_w = int(new_h), int(new_w)
-        # rescale image and grains
+        # rescale image and grains without splining / anti-aliasing the grains
         img = transform.resize(image, (new_h, new_w))
-        grains = transform.resize(grain, (new_h, new_w))
+        grains = transform.resize(grain, (new_h, new_w), order=0, preserve_range=True, anti_aliasing=False)
         # rescale splines
         for mol_num in splines.keys():
             splines[mol_num]['x_coord'] = splines[mol_num]['x_coord'] * new_h / h
-            splines[mol_num]['x_coord'] = splines[mol_num]['x_coord'] * new_w / w
+            splines[mol_num]['y_coord'] = splines[mol_num]['y_coord'] * new_w / w
         
         sample = {'Image': img, 'Grain': grains, 'Splines': splines}
         

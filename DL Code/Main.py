@@ -15,15 +15,19 @@ from torch.utils.data import DataLoader
 path = "/Users/Maxgamill/Desktop/Uni/PhD/Project/Data/"
 
 # Load the data and transform it via rescaling so all are the same
+'''
 trans_dataset = dataloader.SegmentationData(images_path=str(path+'Images/'),
                                    json_path=str(path+'JSONs/relaxed_minicircles.json'),
                                    grains_path=str(path+'/Segmentations/'),
-                                   transform=(transforms.Compose([dataTransforms.Rescale(512),
-                                                                  dataTransforms.ToTensor()])))
+                                   transform=(transforms.Compose([dataTransforms.Rescale(512),dataTransforms.ToTensor()])))
+'''
+dataset = dataloader.SegmentationData(images_path=str(path+'Images/'),
+                                   json_path=str(path+'JSONs/relaxed_minicircles.json'),
+                                   grains_path=str(path+'/Segmentations/'),
+                                   transform=(transforms.Compose([dataTransforms.Rescale(256)])))
 
 # Setup iterator 
-dataload = DataLoader(trans_dataset)
-
+#dataload = DataLoader(trans_dataset)
 
 
 

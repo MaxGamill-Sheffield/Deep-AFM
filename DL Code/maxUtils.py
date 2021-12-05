@@ -8,15 +8,13 @@ Created on Wed Nov 24 15:15:21 2021
 
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import pandas as pd
-import json
 from torchvision import utils
 
 class graphical():
     ''' Contains all graph producing functions'''
     
-    def show_overlays(image, grain, spline_df, single=0, save=0):
+    def show_overlays(image, grain, spline_dict, single=0, save=0, axis=False):
         '''
         Takes an image, its backbones and segmentation and plots 2 or 3
             graphs - An image-spline graph, and a single/multi grain-spline 
@@ -26,9 +24,9 @@ class graphical():
         ----------
         image : ndarray
             An image file loaded with scikit.io.
-        spline_df : pandas DataFrame
-            A pandas DataFrame with columns of the molecule number, an array
-            of x coords and and array of y coords.
+        spline_df : dict
+            A dictionary formatted as the molecule number: {'x_coords': an 
+            ndarray or list of x coords and the same for y coords.
         grain : ndarrray.
             A NxN numoy array with 0 as the background and integers related to
             the molecule number.
@@ -38,6 +36,8 @@ class graphical():
         save : str, optional
             A path to save the produced graph to. The default is 0 which
             means no file is saved.
+        save : bool, optional
+            A flag to show the axis on the graphs. (For judging scales)
 
         Returns
         -------
@@ -45,7 +45,7 @@ class graphical():
 
         '''
         
-        tot_mols = len(spline_df)
+        tot_mols = len(spline_dict)
         
         if single==0:
             plot_no = 2
@@ -53,34 +53,34 @@ class graphical():
             assert isinstance(single,int) and single<=tot_mols and single>=0,\
             "`single` should be an integer <= %i." %tot_mols
             plot_no = 3
-            grain_copy = np.zeros(grain.shape) + grain
+            grain_copy = np.zeros(grain.shape) + np.array(grain)
             grain_copy[grain_copy==single]=255
         
         # Create subplots for image and grain graphs
         fig, ax = plt.subplots(1,plot_no)
         ax[0].set_title('Image and Splines')
         ax[0].imshow(image, cmap='gray')
-        ax[0].axis('off')
         ax[1].set_title('All Masks and Splines')
         ax[1].imshow(grain)
-        ax[1].axis('off')
         
         # Plot the splines on the subplots
-        for mol_num in range(tot_mols):
-            ax[0].plot(spline_df['x'][mol_num], spline_df['y'][mol_num],
-                     label = int(mol_num)+1)
-            ax[1].plot(spline_df['x'][mol_num], spline_df['y'][mol_num],
-                     label = int(mol_num)+1)
+        for mol_num in spline_dict.keys():
+            ax[0].plot(spline_dict[mol_num]['x_coord'],
+                       spline_dict[mol_num]['y_coord'],label = mol_num)
+            ax[1].plot(spline_dict[mol_num]['x_coord'],
+                       spline_dict[mol_num]['y_coord'],label = mol_num)
             # Plot single grain and spline graph
-            if single!=0 and mol_num==single-1:
+            if single!=0 and mol_num==str(single):
                 ax[2].set_title('Mask %i and Spline' %(single))
                 ax[2].imshow(grain_copy)
-                ax[2].plot(spline_df['x'][mol_num], spline_df['y'][mol_num],
-                         label = int(mol_num)+1)
-                ax[2].axis('off')
+                ax[2].plot(spline_dict[mol_num]['x_coord'],
+                           spline_dict[mol_num]['y_coord'],label = mol_num)
                 
         # Show legend
         ax[0].legend(loc='center right', bbox_to_anchor=(0, 0.5))
+        if axis==0:
+            for i in ax:
+                i.set_axis_off()
         
         # Save the figure to the path specified
         if save != 0:
@@ -106,7 +106,6 @@ class graphical():
                     spline_batch[i, :, 1].numpy(),
                     s=10, marker='.', c='r')
         
-
 
             plt.title('Batch from dataloader')
         
