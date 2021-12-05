@@ -10,7 +10,7 @@ import torch
 import json
 import numpy as np
 from torch.utils.data import Dataset
-import utils
+import maxUtils as mtils
 import os.path
 from skimage import io
 
@@ -41,7 +41,7 @@ class SegmentationData(Dataset):
         with open(json_path) as file:
             self.data_dict = json.load(file)
         # set get image parameter dataframe
-        self.img_params = utils.df_it.get_img_params(self.data_dict)
+        self.img_params = mtils.df_it.get_img_params(self.data_dict)
         # set image and grain paths
         self.img_path = images_path
         self.grains_path = grains_path
@@ -81,10 +81,13 @@ class SegmentationData(Dataset):
         
         # Get spline
         key = self.img_params.iloc[idx, 0]
-        spline_df = utils.df_it.get_splines(self.data_dict[key]['Splines'])
-    
+        spline_dict = self.data_dict[key]['Splines']
+        for mol_num in spline_dict:
+            spline_dict[mol_num]['x_coord'] = np.asarray(spline_dict[mol_num]['x_coord'])
+            spline_dict[mol_num]['y_coord'] = np.asarray(spline_dict[mol_num]['y_coord'])
+            
         # Compile into dictionary as a "sample"
-        sample = {'Image': image, 'Grain': grain, 'Splines': spline_df}
+        sample = {'Image': image, 'Grain': grain, 'Splines': spline_dict}
         
         # Compute transforms
         if self.transform:
