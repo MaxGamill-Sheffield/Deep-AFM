@@ -13,6 +13,7 @@ from torch.utils.data import Dataset
 import maxUtils as mtils
 import os.path
 from skimage import io
+import pandas as pd
 
 
 class SegmentationData(Dataset):
@@ -86,8 +87,11 @@ class SegmentationData(Dataset):
             spline_dict[mol_num]['x_coord'] = np.asarray(spline_dict[mol_num]['x_coord'])
             spline_dict[mol_num]['y_coord'] = np.asarray(spline_dict[mol_num]['y_coord'])
             
+        # Get contour lengths and class labels in pandas df
+        data = mtils.df_it.get_labels(self.data_dict, key)
+        
         # Compile into dictionary as a "sample"
-        sample = {'Image': image, 'Grain': grain, 'Splines': spline_dict}
+        sample = {'Image': image, 'Grain': grain, 'Splines': spline_dict, 'Data': np.array([[1]])}
         
         # Compute transforms
         if self.transform:
