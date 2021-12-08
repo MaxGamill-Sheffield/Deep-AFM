@@ -7,7 +7,6 @@ Created on Fri Nov  5 12:41:09 2021
 """
 import json
 import os
-import image_transforms as it
 
 
 def get_spline_jsons(path):
@@ -55,26 +54,6 @@ def merge_data(tracestats, splines):
         
     return new_dict
 
-
-
-ts_path = "/Users/Maxgamill/Desktop/Uni/PhD/TopoStats/"
-json_path = "/Users/Maxgamill/Desktop/Uni/PhD/Project/Data/JSONs/"
-data_path = "/Users/Maxgamill/Desktop/Uni/PhD/Project/Data/"
-
-tracestats = read_json(ts_path + 'tracestats.json')
-splines = get_spline_jsons(ts_path + 'data/')
-
-merged_json = merge_data(tracestats, splines)
-
-img_dict = it.import_files(ts_path+'data/Processed/', '.png')
-grain_dict = it.import_files(ts_path+'data/', '.txt')
-
-it.save_modified_array_files(img_dict, data_path+'Images/', '.png')
-it.save_modified_array_files(grain_dict, data_path+'Segmentations/', '.txt')
-
-with open(json_path+"relaxed_minicircles.json", 'w') as file:
-    full_dict_cp = it.add_spline_translations(merged_json)
-    json.dump(full_dict_cp, file)
 
 
 
