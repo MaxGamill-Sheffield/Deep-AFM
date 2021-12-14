@@ -23,11 +23,12 @@ merged_json = je.merge_data(tracestats, splines)
 
 
 # If using Apeer annotated masks data
+'''
 apeer_path = "/Users/Maxgamill/Desktop/Uni/PhD/Project/Apeer/"
 apeer_dict = utils.import_files(apeer_path,'.ome.tiff')
 apeer_dict = utils.reorder_apeer(apeer_dict)
 grain_dict, label_dict = utils.apeer_convert(apeer_dict)
-
+'''
 # If using sole TopoStats data
 grain_dict = utils.import_files(ts_path+'data/', '.txt')
 
