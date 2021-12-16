@@ -98,6 +98,4 @@ class SegmentationData(Dataset):
             sample = self.transform(sample)
         
         return sample
-        
     
-

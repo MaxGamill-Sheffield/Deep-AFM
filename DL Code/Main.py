@@ -32,6 +32,5 @@ for i_batch, sample_batched in enumerate(dataload):
     print(i_batch, sample_batched['Image'].size(), sample_batched['Grain'].size())
     # observe 4th batch and stop.
     if i_batch == 3:
+        mtils.graphical.show_batch(sample_batched)
         break
-
-
