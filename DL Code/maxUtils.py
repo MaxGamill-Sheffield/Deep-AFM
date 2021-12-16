@@ -87,7 +87,10 @@ class graphical():
             plt.savefig(save)
         
     def show_batch(sample_batched):
-        
+        ''' UNFINISHED
+        Should be made to do show overlays but iterate through a batch on
+        one figure
+        '''
         images_batch, grains_batch, spline_batch = \
             sample_batched['Image'], sample_batched['Grain'], sample_batched['Splines']
         batch_size = len(images_batch)
@@ -100,18 +103,19 @@ class graphical():
         grid2 = utils.make_grid(grains_batch)
         ax[1].imshow(grid2.numpy().transpose((1, 2, 0)))
 
-        for i in range(spline_batch):
+        for i in range(batch_size):
             ### needs adjusting for xy
-            plt.scatter(spline_batch[i, :, 0].numpy() + i * im_size,
-                    spline_batch[i, :, 1].numpy(),
-                    s=10, marker='.', c='r')
-        
+            print(spline_batch.size())
+            '''
+            ax[0].plot(spline_batch[i, :, 0].numpy() + i * im_size,
+                    spline_batch[i, :, 1].numpy())
+            ax[1].plot(spline_batch[i, :, 0].numpy() + i * im_size,
+                    spline_batch[i, :, 1].numpy())
+            '''
 
             plt.title('Batch from dataloader')
-        
-        
-        
-        plt.title('Batch from dataloader')
+        plt.show()
+
         
 class df_it():
     '''Converts data to more accessable and usable dataframes'''
@@ -145,8 +149,19 @@ class df_it():
                                      columns=df_cols) for keys in json_dict.keys()], ignore_index=True)
         return df
             
-
-            
+    def get_labels(json_dict, key):
+        '''
+        May or may not need this as dataframes don't work well with dataloader
+        '''
+        class_labels = json_dict[key]['Circular']
+        contours = json_dict[key]['Contour Lengths']
+        df_cols = ['Molecule Number', 'Circular', 'Contour Lengths']
+        df = pd.concat([pd.DataFrame([[mol_num,
+                                             class_labels[mol_num],
+                                             contours[mol_num]]],
+                                           columns = df_cols) for mol_num in json_dict[key]['Circular'].keys()])
+        
+        return df
             
             
             
