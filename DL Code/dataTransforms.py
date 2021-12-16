@@ -8,6 +8,7 @@ Created on Mon Nov 29 16:21:45 2021
 
 from skimage import transform
 import torch
+import numpy as np
 
 class Rescale(object):
     ''' Rescale the image in a sample to a given size.
@@ -24,7 +25,8 @@ class Rescale(object):
         
     def __call__(self, sample):
         # get data from sample dict
-        image, grain, splines = sample['Image'], sample['Grain'], sample['Splines']
+        image, grain, splines, data = \
+            sample['Image'], sample['Grain'], sample['Splines'], sample['Data']
         # get height and width from the image shape
         h, w = image.shape[:2] # Although only 1 channel, may have more in future
         
@@ -48,28 +50,32 @@ class Rescale(object):
             splines[mol_num]['x_coord'] = splines[mol_num]['x_coord'] * new_h / h
             splines[mol_num]['y_coord'] = splines[mol_num]['y_coord'] * new_w / w
         
-        sample = {'Image': img, 'Grain': grains, 'Splines': splines}
+        sample = {'Image': img, 'Grain': grains, 'Splines': splines, 'Data': data}
         
         return sample
             
             
 class ToTensor(object):
-    ''' Converts np arrays to tensors '''
-    
+    ''' Converts np arrays to tensors UNFINISHED - need to include splines & data '''
+    # get data from sample dict
     def __call__(self, sample):
         
-        image, grain, splines = sample['Image'], sample['Grain'], sample['Splines']
+        image, grain = sample['Image'], sample['Grain'] #, sample['Splines'], sample['Data']
         
         # numpy image: H x W x C (as np axis 0,1,2) & torch image: C x H x W (as np axis 2,0,1)
         # -> Will have to add channel input/selection too when using multiple channels.
-        #image = image.transpose((2,0,1)) ...
-        
+        image = np.expand_dims(image, axis=0)
+        grain = np.expand_dims(grain, axis=0)
+
+        '''
         for mol_num in splines.keys():
             splines[mol_num]['x_coord'] = torch.tensor(splines[mol_num]['x_coord'])
             splines[mol_num]['y_coord'] = torch.tensor(splines[mol_num]['y_coord'])
+        '''
+        # May or may not need to convert other labels to tensors
         
-        sample  ={'Image': torch.from_numpy(image),
-                   'Grain': torch.from_numpy(grain), 'Splines': splines}
+        sample = {'Image': torch.from_numpy(image),
+                   'Grain': torch.from_numpy(grain)} #, 'Splines': splines, 'Data': data
         
         return sample
         

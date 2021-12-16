@@ -7,33 +7,14 @@ Created on Tue Nov  9 15:30:13 2021
 """
 
 import numpy as np
-import imageio
-import os
+from skimage import io
 
 
 '''
-Module for importing images and creating more by rotations
+Module for and creating more images by rotations
  should also rotate and save segmentions (grains), 
  make a copy of the matching json with a correct name.
 '''
-
-def import_files(path, ext):
-    # Imports images from directpry into a dictionary
-    filelist = os.listdir(path)
-    file_dict = {}
-    for file in filelist[:]:
-        file_ext = file.split('.')[-1]
-        if ext == '.png' and file_ext == 'png':
-            file_dict[file.split(ext)[0]] = np.asarray(imageio.imread(path+file))
-        elif ext == '.txt' and file_ext == 'txt':
-            contents = np.loadtxt(path+file)
-            sq_array_len = np.sqrt(contents.size)
-            file_dict[file.split(ext)[0]] = np.reshape(contents, 
-                                                       [int(sq_array_len),
-                                                        int(sq_array_len)])
-        else:
-            pass
-    return file_dict
 
 
 def rotate(img_array):
@@ -54,19 +35,19 @@ def save_modified_array_files(array_dict, path_out, ftype):
         array_rot90_flip_vertical = np.flip(array_rot90,axis=0)
         array_rot90_flip_horizontal = np.flip(array_rot90,axis=1)
         
-        if ftype == '.png':
+        if ftype == '.png' or ftype == '.ome.tiff':
             # <name+transform>_<channel>_<colour>.png
             label = fname.split('_',len(fname.split('_'))-3)[-1]
             name = fname.split('_'+label)[0]
-            imageio.imsave(path_out+fname+'.png', array)
-            imageio.imsave(path_out+name+'-rot-90_'+label+'.png', array_rot90)
-            imageio.imsave(path_out+name+'-rot-180_'+label+'.png', array_rot180)
-            imageio.imsave(path_out+name+'-rot-270_'+label+'.png', array_rot270)
+            io.imsave(path_out+fname+'.png', array)
+            io.imsave(path_out+name+'-rot-90_'+label+'.png', array_rot90)
+            io.imsave(path_out+name+'-rot-180_'+label+'.png', array_rot180)
+            io.imsave(path_out+name+'-rot-270_'+label+'.png', array_rot270)
             
-            imageio.imsave(path_out+name+'-flip-horizontal_'+label+'.png', array_flip_horizontal)
-            imageio.imsave(path_out+name+'-flip-vertical_'+label+'.png', array_flip_vertical)
-            imageio.imsave(path_out+name+'-rot-90-flip-horizontal_'+label+'.png', array_rot90_flip_horizontal)
-            imageio.imsave(path_out+name+'-rot-90-flip-vertical_'+label+'.png', array_rot90_flip_vertical)
+            io.imsave(path_out+name+'-flip-horizontal_'+label+'.png', array_flip_horizontal)
+            io.imsave(path_out+name+'-flip-vertical_'+label+'.png', array_flip_vertical)
+            io.imsave(path_out+name+'-rot-90-flip-horizontal_'+label+'.png', array_rot90_flip_horizontal)
+            io.imsave(path_out+name+'-rot-90-flip-vertical_'+label+'.png', array_rot90_flip_vertical)
         elif ftype == '.txt':
             name = fname[:-7] # <name>
             np.savetxt(path_out+fname+'.txt', array)
@@ -154,6 +135,5 @@ def add_spline_translations(full_dict):
         full_dict_cp[fname+'-rot-90-flip-horizontal']['Splines'] = spline_trans_dict['rot_90_hori']
     
     return full_dict_cp
-
 
 
