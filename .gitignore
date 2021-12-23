@@ -1,3 +1,4 @@
 *.ini
 *.bak
 test.py
+.DS_Store

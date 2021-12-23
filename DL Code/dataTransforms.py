@@ -79,9 +79,3 @@ class ToTensor(object):
         
         return sample
         
-        
-
-        
-        
-        
-        

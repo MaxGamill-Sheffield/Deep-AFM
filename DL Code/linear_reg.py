@@ -20,16 +20,32 @@ def normal_equ_var(X, w, y):
     N = len(X)
     return 1/N * (y- (X @ w)).T @ (y- (X @ w))
 
-def output(design_matrix, y):
-    w = normal_equ_w(design_matrix, y)
-    var = normal_equ_var(design_matrix, w, y)# what do with this?
-    out = w.T @ design_matrix.T
-    return out, var
+def output(design_matrix, y_or_w, predict=False):
+    if predict==False:  
+        y = y_or_w
+        w = normal_equ_w(design_matrix, y)
+        var = normal_equ_var(design_matrix, w, y)# what do with this?
+        out = w.T @ design_matrix.T
+        return out, var, w
+    else:
+        w = y_or_w
+        return w.T @ design_matrix.T
+    
+    
 
 class basis_func():
     
-    def polynomial(x, n):
-        return x**n
+    def polynomial(x, num_basis=4, data_limits=[-1., 1.]):
+        "Polynomial basis"
+        centre = data_limits[0]/2. + data_limits[1]/2.
+        span = data_limits[1] - data_limits[0]
+        z = (x / x.mean()) * span + centre
+        z = z.reshape(len(z),1)
+        Phi = np.zeros((x.shape[0], num_basis))
+        for i in range(num_basis):
+            Phi[:, i:i+1] = z**i
+            
+        return Phi
     
     def sigmoid(x, s=1):
         1/(1+np.exp(-1*(x-np.mean(x))/s))
@@ -56,50 +72,61 @@ def get_spline_jsons(path):
 #------- In Helper Scripts -------
 
 #------- Should be in Helper Scripts graphical -------
-def plot_poly_overlays(x, y, M):
+def plot_overlays(x, y, image, labels, title=None): #x,y are touples
     fig, ax = plt.subplots(1,2,figsize=(10,5))
-    phi = np.ones((y.shape[0], M))
-    for m in range(M-1):
-        phi[:, m+1] = basis_func.polynomial(x, M)
     
-    phi = np.array([basis_func.polynomial(x, n) for n in range(M+1)]).T
-    ml_out, var_out = output(phi, y)
+    fig.suptitle(title)
     
-    fig.suptitle('ML Gaussian splining with Polynomial Degree M=%i'%M)
-    label = 'ML Gaussian'
-    ax[0].plot(x,y, label='TopoStats')
-    ax[0].plot(x,ml_out, label=label)
-    ax[1].plot(x,y, label='TopoStats')
-    ax[1].plot(x,ml_out, label=label)
-    ax[1].imshow(im, origin='upper', cmap='gray')
+    if isinstance(x,tuple):
+        for i in range(len(x)):
+            # plot original xy
+            ax[0].plot(x[i], y[i], label=labels[i])
+            ax[1].plot(x[i], y[i], label=labels[i])
+
+    ax[1].imshow(image, origin='upper', cmap='gray')
     ax[0].legend()
 
-
-def plot_exp_overlays(x, y, M):    
-    fig, ax = plt.subplots(1,2,figsize=(10,5))
-    phi = np.ones((y.shape[0], len(M)))
-    for m in M:
-        phi[:, m+1] = basis_func.exp(x, m)
-    
-    phi = np.array([basis_func.exp(x, m) for m in M]).T
-    ml_out = output(phi, y)
-    
-    fig.suptitle('ML Exp splining with sigma=%i, mu=%i'%(m,1))
-    label = 'ML Exp'
-    ax[0].plot(x,y, label='TopoStats')
-    ax[0].plot(x,ml_out, label=label)
-    ax[1].plot(x,y, label='TopoStats')
-    ax[1].plot(x,ml_out, label=label)
-    ax[1].imshow(im, origin='upper', cmap='gray')
-    ax[0].legend()
 #------- Should be in Helper Scripts graphical -------
+
+def score(pred, y):
+    return np.sum((pred-y)**2)**0.5
 
 
 ts_path = "/Users/Maxgamill/Desktop/Uni/PhD/TopoStats/"
 splines = get_spline_jsons(ts_path + 'data/')
-im = io.imread(ts_path+'data/Processed/20160722_339_REL_15ng_434rep_80ng_PLL.077_ZSensor_processed_grey.tif')
+im = io.imread(ts_path+'data/Processed/20161024_339_LIN_6ng_434rep_8ng_PLL.026_ZSensor_processed_grey.tif')
 
-lin = splines['20160722_339_REL_15ng_434rep_80ng_PLL.077']['Splines']['2']
-x = np.asarray(lin['x_coord'])
-#X = np.column_stack([np.ones(len(x)), x]) #including bias
-y = np.asarray(lin['y_coord'])
+# want to loop through all polynomials (max=10?), calc best scores and choose spline.
+def polynomial_splining(spline_dict, max_poly=9, num_new_x=1000, plot_examples=False):
+
+    for key in splines.keys(): # for each file
+        im = io.imread(ts_path+'data/Processed/'+key+'_ZSensor_processed_grey.tif')
+        for mol in splines[key]['Splines']: # for each molecule in file
+            score_list = []
+            x = np.asarray(splines[key]['Splines'][mol]['x_coord'])
+            y = np.asarray(splines[key]['Splines'][mol]['y_coord'])
+            for i in range(1, max_poly+1): # for each polynomial degree
+                # Compute a design matrix, run through ML and compute a score
+                basis = basis_func.polynomial(x,i)
+                pred = output(basis, y)[0]
+                score_list.append(score(pred,y))
+            # Get weights from best score polynomial
+            basis_num = score_list.index(min(score_list))+1 # +1 as start at poly 1 which mismatches with list index
+            basis = basis_func.polynomial(x, basis_num)
+            preds, var, w = output(basis, y, predict=False)
+            # Get predictions on weights for more x values
+            new_x = np.linspace(min(x), max(x), 1000)
+            new_basis = basis_func.polynomial(new_x, basis_num)
+            splined_preds = output(new_basis, w, predict=True)
+            # Plot a graph
+            if plot_examples==True:
+                title='Polynomial Degree = %i'%basis_num
+                x_tup, y_tup = (x,x,new_x), (y, preds, splined_preds)
+                labels = ('Topo', 'Poly', 'Poly Splined')
+                plot_overlays(x_tup, y_tup, im, title=title, labels=labels)#, new_x=new_x)
+                plt.imshow(im, cmap='gray')
+                plt.legend()
+            # Overwrite current x and y coords
+            splines[key]['Splines'][mol]['x_coord'] = new_x
+            splines[key]['Splines'][mol]['y_coord'] = splined_preds
+

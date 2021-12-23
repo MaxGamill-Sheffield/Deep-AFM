@@ -91,29 +91,42 @@ class graphical():
         Should be made to do show overlays but iterate through a batch on
         one figure
         '''
-        images_batch, grains_batch, spline_batch = \
-            sample_batched['Image'], sample_batched['Grain'], sample_batched['Splines']
-        batch_size = len(images_batch)
-        im_size = images_batch.size(2)
+        images_batch, grains_batch = sample_batched['Image'], sample_batched['Grain']
+        batch_size = len(images_batch) # needed when adding splines
+        im_size = images_batch.size(2) # needed when adding splines
+        grid_border_size=2 # needed when adding splines
         
-        fig, ax = plt.subplots(2,1)
+        #grid = utils.make_grid(images_batch)
+        #plt.imshow(grid.numpy().transpose((1, 2, 0)))
+        #plt.title('Batch from dataloader')
+        #plt.show()
         
-        grid = utils.make_grid(images_batch)
-        ax[0].imshow(grid.numpy().transpose((1, 2, 0)))
-        grid2 = utils.make_grid(grains_batch)
-        ax[1].imshow(grid2.numpy().transpose((1, 2, 0)))
-
-        for i in range(batch_size):
-            ### needs adjusting for xy
-            print(spline_batch.size())
-            '''
-            ax[0].plot(spline_batch[i, :, 0].numpy() + i * im_size,
-                    spline_batch[i, :, 1].numpy())
-            ax[1].plot(spline_batch[i, :, 0].numpy() + i * im_size,
-                    spline_batch[i, :, 1].numpy())
-            '''
-
-            plt.title('Batch from dataloader')
+        # get figure layout
+        if batch_size <= 2 or batch_size % 2 == 1:
+            rows=batch_size
+            cols=1
+            fig, ax = plt.subplots(int(rows), 2*cols)
+            for i in range(int(rows)):
+                ax[i, 0].imshow(images_batch[i].numpy().transpose((1,2,0)))
+                ax[i, 0].set_axis_off()
+                ax[i, 1].imshow(grains_batch[i].numpy().transpose((1,2,0)))
+                ax[i, 1].set_axis_off()
+        else:
+            rows=batch_size/2
+            cols=2
+            # As plotting image and grain, need dims x 2
+            fig, ax = plt.subplots(int(rows), 2*cols)
+            for i in range(int(rows)):
+                ax[i, 0].imshow(images_batch[i].numpy().transpose((1,2,0)))
+                ax[i, 0].set_axis_off()
+                ax[i, 1].imshow(grains_batch[i].numpy().transpose((1,2,0)))
+                ax[i, 1].set_axis_off()
+                ax[i, 2].imshow(images_batch[i+int(rows)].numpy().transpose((1,2,0)))
+                ax[i, 2].set_axis_off()
+                ax[i, 3].imshow(grains_batch[i+int(rows)].numpy().transpose((1,2,0)))
+                ax[i, 3].set_axis_off()
+        fig.title('')        
+        plt.axis('off')
         plt.show()
 
         
