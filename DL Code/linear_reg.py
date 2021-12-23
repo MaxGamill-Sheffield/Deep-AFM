@@ -72,24 +72,7 @@ def get_spline_jsons(path):
 #------- In Helper Scripts -------
 
 #------- Should be in Helper Scripts graphical -------
-def plot_overlays(x, x_pred, y, image, title=None, new_x=None):
-    fig, ax = plt.subplots(1,2,figsize=(10,5))
-    
-    fig.suptitle(title)
-    ax[0].plot(x, y, label='TopoStats Fit')
-    ax[1].plot(x, y, label='TopoStats Fit')
-    if not isinstance(new_x, type(None)): # if trying to spline, plot spline
-        ax[0].plot(new_x, x_pred, label='ML Fit')
-        ax[1].plot(new_x, x_pred, label='ML Fit')
-    else:
-        ax[0].plot(x, x_pred, label='Topostats Fit')
-        ax[1].plot(x, x_pred, label='ML Fit')
-        
-    ax[1].imshow(image, origin='upper', cmap='gray')
-    ax[0].legend()
-    
-
-def plot_overlays2(x, y, image, labels, title=None): #x,y are touples
+def plot_overlays(x, y, image, labels, title=None): #x,y are touples
     fig, ax = plt.subplots(1,2,figsize=(10,5))
     
     fig.suptitle(title)
@@ -140,7 +123,7 @@ def polynomial_splining(spline_dict, max_poly=9, num_new_x=1000, plot_examples=F
                 title='Polynomial Degree = %i'%basis_num
                 x_tup, y_tup = (x,x,new_x), (y, preds, splined_preds)
                 labels = ('Topo', 'Poly', 'Poly Splined')
-                plot_overlays2(x_tup, y_tup, im, title=title, labels=labels)#, new_x=new_x)
+                plot_overlays(x_tup, y_tup, im, title=title, labels=labels)#, new_x=new_x)
                 plt.imshow(im, cmap='gray')
                 plt.legend()
             # Overwrite current x and y coords
