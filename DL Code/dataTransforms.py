@@ -25,8 +25,8 @@ class Rescale(object):
         
     def __call__(self, sample):
         # get data from sample dict
-        image, grain, splines, data = \
-            sample['Image'], sample['Grain'], sample['Splines'], sample['Data']
+        image, grain = \
+            sample['Image'], sample['Grain'] #, sample['Splines'], sample['Data']
         # get height and width from the image shape
         h, w = image.shape[:2] # Although only 1 channel, may have more in future
         
@@ -45,21 +45,22 @@ class Rescale(object):
         # rescale image and grains without splining / anti-aliasing the grains
         img = transform.resize(image, (new_h, new_w))
         grains = transform.resize(grain, (new_h, new_w), order=0, preserve_range=True, anti_aliasing=False)
+        '''
         # rescale splines
         for mol_num in splines.keys():
             splines[mol_num]['x_coord'] = splines[mol_num]['x_coord'] * new_h / h
             splines[mol_num]['y_coord'] = splines[mol_num]['y_coord'] * new_w / w
-        
-        sample = {'Image': img, 'Grain': grains, 'Splines': splines, 'Data': data}
+        '''
+        sample = {'Image': img, 'Grain': grains} # 'Splines': splines, 'Data': data}
         
         return sample
             
             
 class ToTensor(object):
-    ''' Converts np arrays to tensors UNFINISHED - need to include splines & data '''
+    ' Converts np arrays to tensors UNFINISHED - need to include splines & data'
     # get data from sample dict
     def __call__(self, sample):
-        
+        # Extract sample parts
         image, grain = sample['Image'], sample['Grain'] #, sample['Splines'], sample['Data']
         
         # numpy image: H x W x C (as np axis 0,1,2) & torch image: C x H x W (as np axis 2,0,1)
@@ -78,4 +79,17 @@ class ToTensor(object):
                    'Grain': torch.from_numpy(grain)} #, 'Splines': splines, 'Data': data
         
         return sample
+    
+class NormaliseTiff(object):
+    'Sets TIFF image values between 0 and 1 by dividing by 65535'
+    def __call__(self, sample):
+        # Extract sample parts
+        image, grain = sample['Image'], sample['Grain']
+        # Divide by max TIFF pixel value
+        image = image/65535
+        # Reform sample
+        sample = {'Image': image,
+                   'Grain': grain}
+        return sample
+    
         
