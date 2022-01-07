@@ -91,7 +91,7 @@ class SegmentationData(Dataset):
         data = mtils.df_it.get_labels(self.data_dict, key)
         
         # Compile into dictionary as a "sample"
-        sample = {'Image': image, 'Grain': grain, 'Splines': spline_dict, 'Data': np.array([[1]])}
+        sample = {'Image': image, 'Grain': grain, 'Splines': spline_dict, 'Data': data}
         
         # Compute transforms
         if self.transform:
