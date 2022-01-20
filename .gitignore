@@ -2,3 +2,4 @@
 *.bak
 test.py
 .DS_Store
+example_data
