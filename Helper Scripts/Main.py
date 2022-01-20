@@ -9,7 +9,7 @@ Created on Wed Dec  8 15:37:21 2021
 import json
 import utils
 import image_transforms as it
-import json_edditor as je
+import json_editor as je
 
 
 # Set paths for TopoStats, TopoStats produced JSON, resultant image data and

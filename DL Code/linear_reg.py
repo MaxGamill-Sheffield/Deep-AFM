@@ -85,7 +85,7 @@ class basis_func():
 
     def gaussian(x, var):
         return np.exp(-1 * ((x-np.mean(x))**2)/var)
-    
+   
 
 def score(pred, y):
     return np.sum((pred-y)**2)**0.5
