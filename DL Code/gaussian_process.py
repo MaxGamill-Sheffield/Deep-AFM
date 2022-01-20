@@ -96,7 +96,7 @@ def contour_len(x, y):
             hypotenuse_array = [math.hypot((x1 - x2), (y1 - y2))]
         return np.sum(np.array(hypotenuse_array))
 
-def gaussian_process(spline_dict, kernel=GP.sq_exp_kernel, kernel_l=1, kernel_sigma=1, new_points=1000):
+def gaussian_process(spline_dict, kernel=GP.sq_exp_kernel, kernel_l=1, kernel_sigma=1, new_points=1000, plot_examples=False):
     for key in splines.keys(): # for each file
         im = io.imread(ts_path+'data/Processed/'+key+'_ZSensor_processed_grey.tif')
         for mol in splines[key]['Splines']: # for each molecule in file
@@ -108,8 +108,7 @@ def gaussian_process(spline_dict, kernel=GP.sq_exp_kernel, kernel_l=1, kernel_si
             x_new = np.linspace(min(x),max(x), new_points)
             f_posterior = model.posterior(x_new, GP.sq_exp_kernel)
 
-            plot_examples=True
-            if plot_examples==True:
+            if plot_examples:
                 title='Gaussian Proccess Splining Results'
                 x_tup, y_tup = (x,x_new), (y, f_posterior[0])
                 labels = ('Topo', 'GP Splines')
@@ -131,7 +130,7 @@ ts_path = "/Users/Maxgamill/Desktop/Uni/PhD/TopoStats/"
 splines = get_spline_jsons(ts_path + 'data/')
 im = io.imread(ts_path+'data/Processed/20161024_339_LIN_6ng_434rep_8ng_PLL.026_ZSensor_processed_grey.tif')
 
-gaussian_process(splines, new_points=1000)
+gaussian_process(splines, new_points=1000, plot_examples=True)
 
 
 
