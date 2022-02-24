@@ -14,20 +14,23 @@ import matplotlib.pyplot as plt
 np.random.seed(2021)
 
 def contour_length(x, y):
+    # computes the length of the 2 coords on either end of the period
     end_len = ((x[-1]-x[0])**2+(y[-1]-y[0])**2)**0.5
     cont_len=0
     for i in range(len(x)-1):
+        # calcs euclidean distance between points
         cont_len += ((x[i]-x[i+1])**2+(y[i]-y[i+1])**2)**0.5
     cont_len += end_len
     return cont_len
 
 
-def create_rand_circle(H=15, size_limit=1, points=101, log_rng = (-0.5,-2.5)):
+def create_rand_circle(H=15, size_limit=1, no_points=101, log_rng=(-0.5,-2.5)):
+    # H is the number of circles you will sum to produce the distored circles
     # Randomize amplitude and phase
-    amp = (np.multiply(np.random.rand(1,H)-0.5, np.logspace(log_rng[0],log_rng[1],H))).T # Hx1
-    phase = np.random.rand(1,H).T * 2*np.pi # Hx1
+    amp = (np.multiply(np.random.rand(1,H)-0.5, np.logspace(log_rng[0],log_rng[1],H))).T
+    phase = np.random.rand(1,H).T * 2*np.pi
     # Accumulate r(t) over t=[0,2*pi]
-    t = np.linspace(0,2*np.pi,points)
+    t = np.linspace(0,2*np.pi, no_points)
     r = np.ones(t.size)
     for h in range(H):
       r += amp[h]*np.sin(h*t+phase[h])
@@ -38,12 +41,12 @@ def create_rand_circle(H=15, size_limit=1, points=101, log_rng = (-0.5,-2.5)):
     y = r * np.sin(t)
     return np.asarray([x,y,r,t]).T
 
-def arrange_circles(no_circle, square_size=512, H=10, size_limit=50, points=101, log_rng=(0,-1.5)):
+def arrange_circles(no_circle, square_size=512, H=10, size_limit=50, no_points=101, log_rng=(0,-1.5)):
     'Generates multiple distorted circles on a canvas'
-    array = np.zeros((no_circle, points, 4)) # create empty array to add to later
+    array = np.zeros((no_circle, no_points, 4)) # create empty array to add to later
     for i in range(no_circle):
         # generate a circle
-        xyrt_array = create_rand_circle(H=H, size_limit=size_limit, points=points, log_rng=log_rng)
+        xyrt_array = create_rand_circle(H=H, size_limit=size_limit, no_points=no_points, log_rng=log_rng)
         # adds a bias to the new random centres
         rand_centre_x = np.random.randint(-10,square_size+10) 
         rand_centre_y = np.random.randint(-10,square_size+10)
@@ -98,7 +101,7 @@ def plot_xyrt(xyrt_array, square_size=1):
     return
 
 
-array = arrange_circles(10, H=10, points=101, log_rng=(0, -1.5))
+array = arrange_circles(10, H=10, no_points=101, log_rng=(0, -1.5))
 
 #a = create_rand_circle(plot=True)
 
