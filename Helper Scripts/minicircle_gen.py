@@ -41,12 +41,12 @@ def create_rand_circle(H=15, size_limit=1, no_points=101, log_rng=(-0.5,-2.5)):
     y = r * np.sin(t)
     return np.asarray([x,y,r,t]).T
 
-def arrange_circles(no_circle, square_size=512, H=10, size_limit=50, points=101, log_rng=(0,-1.5)):
+def arrange_circles(no_circle, square_size=512, H=10, size_limit=50, no_points=101, log_rng=(0,-1.5)):
     'Generates multiple distorted circles on a canvas'
-    array = np.zeros((no_circle, points, 4)) # create empty array to add to later
+    array = np.zeros((no_circle, no_points, 4)) # create empty array to add to later
     for i in range(no_circle):
         # generate a circle
-        xyrt_array = create_rand_circle(H=H, size_limit=size_limit, points=points, log_rng=log_rng)
+        xyrt_array = create_rand_circle(H=H, size_limit=size_limit, no_points=no_points, log_rng=log_rng)
         # adds a bias to the new random centres
         rand_centre_x = np.random.randint(-10,square_size+10) 
         rand_centre_y = np.random.randint(-10,square_size+10)
@@ -101,7 +101,7 @@ def plot_xyrt(xyrt_array, square_size=1):
     return
 
 
-array = arrange_circles(10, H=10, points=101, log_rng=(0, -1.5))
+array = arrange_circles(10, H=10, no_points=101, log_rng=(0, -1.5))
 
 #a = create_rand_circle(plot=True)
 
