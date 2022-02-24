@@ -14,9 +14,11 @@ import matplotlib.pyplot as plt
 np.random.seed(2021)
 
 def contour_length(x, y):
+    # computes the length of the 2 coords on either end of the period
     end_len = ((x[-1]-x[0])**2+(y[-1]-y[0])**2)**0.5
     cont_len=0
     for i in range(len(x)-1):
+        # calcs euclidean distance between points
         cont_len += ((x[i]-x[i+1])**2+(y[i]-y[i+1])**2)**0.5
     cont_len += end_len
     return cont_len
