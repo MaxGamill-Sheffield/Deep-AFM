@@ -24,12 +24,13 @@ def contour_length(x, y):
     return cont_len
 
 
-def create_rand_circle(H=15, size_limit=1, points=101, log_rng = (-0.5,-2.5)):
+def create_rand_circle(H=15, size_limit=1, no_points=101, log_rng=(-0.5,-2.5)):
+    # H is the number of circles you will sum to produce the distored circles
     # Randomize amplitude and phase
-    amp = (np.multiply(np.random.rand(1,H)-0.5, np.logspace(log_rng[0],log_rng[1],H))).T # Hx1
-    phase = np.random.rand(1,H).T * 2*np.pi # Hx1
+    amp = (np.multiply(np.random.rand(1,H)-0.5, np.logspace(log_rng[0],log_rng[1],H))).T
+    phase = np.random.rand(1,H).T * 2*np.pi
     # Accumulate r(t) over t=[0,2*pi]
-    t = np.linspace(0,2*np.pi,points)
+    t = np.linspace(0,2*np.pi, no_points)
     r = np.ones(t.size)
     for h in range(H):
       r += amp[h]*np.sin(h*t+phase[h])
