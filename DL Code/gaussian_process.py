@@ -34,22 +34,27 @@ def get_spline_jsons(path):
 #------- Should be in Helper Scripts graphical -------
 def plot_overlays(x, y, image, labels, title=None, std=None): #x,y are touples
     fig, ax = plt.subplots(1,2,figsize=(10,5))
-    
     fig.suptitle(title)
+    colors = ['m','c','g']
+    x_offset, y_offset = min(x[0]-20), min(y[0]-20)
+    
+    ax[1].imshow(image[y_offset:max(y[0]+20), x_offset:max(x[0]+20)])
     
     if isinstance(x,tuple):
         for i in range(len(x)):
             # plot original xy
-            ax[0].plot(x[i], y[i], label=labels[i])
-            ax[1].plot(x[i], y[i], label=labels[i])
+            ax[0].plot(x[i]-x_offset, y[i]-y_offset, label=labels[i], color=colors[i])
+            ax[1].plot(x[i]-x_offset, y[i]-y_offset, label=labels[i], color=colors[i])
             try:
-                ax[0].fill_between(x[i], (y[i]-std[i]*3), (y[i]+std[i]*3), alpha=0.1)
-                ax[1].fill_between(x[i], (y[i]-std[i]*3), (y[i]+std[i]*3), alpha=0.1)
+                ax[0].fill_between(x[i]-x_offset, (y[i]-y_offset-std[i]*3), (y[i]-y_offset+std[i]*3), alpha=0.1)
+                ax[1].fill_between(x[i]-x_offset, (y[i]-y_offset-std[i]*3), (y[i]-y_offset+std[i]*3), alpha=0.1)
             except:
                 pass
-            
-    ax[1].imshow(image, origin='upper', cmap='gray')
+                
+    ax[0].set_ylim(ax[0].get_ylim()[::-1])
+    
     ax[0].legend()
+    ax[1].legend()
 #------- Should be in Helper Scripts graphical -------
 
 class GP():
@@ -110,11 +115,9 @@ def gaussian_process(spline_dict, kernel=GP.sq_exp_kernel, kernel_l=1, kernel_si
 
             if plot_examples:
                 title='Gaussian Proccess Splining Results'
-                x_tup, y_tup = (x,x_new), (y, f_posterior[0])
+                x_tup, y_tup = (x.reshape(-1),x_new.reshape(-1)), (y.reshape(-1), f_posterior[0])
                 labels = ('Topo', 'GP Splines')
                 plot_overlays(x_tup, y_tup, im, title=title, labels=labels, std=f_posterior[1])
-                plt.imshow(im, cmap='gray')
-                plt.legend()
 
             print('GP: ', contour_len(x_new, f_posterior[0]))
             print('Topo: ', contour_len(x,y))
@@ -131,7 +134,6 @@ splines = get_spline_jsons(ts_path + 'data/')
 im = io.imread(ts_path+'data/Processed/20161024_339_LIN_6ng_434rep_8ng_PLL.026_ZSensor_processed_grey.tif')
 
 gaussian_process(splines, new_points=1000, plot_examples=True)
-
 
 
 
