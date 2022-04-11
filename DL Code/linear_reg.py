@@ -34,17 +34,20 @@ def get_spline_jsons(path):
 #------- Should be in Helper Scripts graphical -------
 def plot_overlays(x, y, image, labels, title=None): #x,y are touples
     fig, ax = plt.subplots(1,2,figsize=(10,5))
-    
     fig.suptitle(title)
+    colors = ['m','c','g']
+    ax[1].imshow(image[min(y[0])-20:max(y[0])+20, min(x[0])-20:max(x[0])+20])
     
     if isinstance(x,tuple):
         for i in range(len(x)):
             # plot original xy
-            ax[0].plot(x[i], y[i], label=labels[i])
-            ax[1].plot(x[i], y[i], label=labels[i])
-
-    ax[1].imshow(image, origin='upper', cmap='gray')
+            ax[0].plot(x[i]-min(x[0]-20), y[i]-min(y[0]-20), label=labels[i], color=colors[i])
+            ax[1].plot(x[i]-min(x[0]-20), y[i]-min(y[0]-20), label=labels[i], color=colors[i])
+    
+    ax[0].set_ylim(ax[0].get_ylim()[::-1])
     ax[0].legend()
+    ax[1].legend()
+    #plt.savefig('a')
 #------- Should be in Helper Scripts graphical -------
 
 def normal_equ_w(design_matrix, y):
@@ -64,7 +67,8 @@ def output(design_matrix, y_or_w, predict=False):
     else:
         w = y_or_w
         return w.T @ design_matrix.T
-    
+
+
 
 class basis_func():
     
@@ -119,8 +123,7 @@ def polynomial_splining(splines, max_poly=9, num_new_x=1000, plot_examples=False
                 x_tup, y_tup = (x,x,new_x), (y, preds, splined_preds)
                 labels = ('Topo', 'Poly', 'Poly Splined')
                 plot_overlays(x_tup, y_tup, im, title=title, labels=labels)#, new_x=new_x)
-                plt.imshow(im, cmap='gray')
-                plt.legend()
+                #plt.imshow(im, cmap='gray')
             # Overwrite current x and y coords
             splines[key]['Splines'][mol]['x_coord'] = new_x
             splines[key]['Splines'][mol]['y_coord'] = splined_preds
@@ -128,6 +131,5 @@ def polynomial_splining(splines, max_poly=9, num_new_x=1000, plot_examples=False
 #------- Run Script --------
 ts_path = "/Users/Maxgamill/Desktop/Uni/PhD/TopoStats/"
 splines = get_spline_jsons(ts_path + 'data/')
-im = io.imread(ts_path+'data/Processed/20161024_339_LIN_6ng_434rep_8ng_PLL.026_ZSensor_processed_grey.tif')
 
 polynomial_splining(splines, max_poly=9, num_new_x=1000, plot_examples=True)
