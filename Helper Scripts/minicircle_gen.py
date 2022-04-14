@@ -15,7 +15,7 @@ from scipy.ndimage import gaussian_filter
 np.random.seed(2021)
 
 class Plots():
-    def plot_xyrt(xyrt_array, square_size=1, save=False):
+    def plot_xyrt(xyrt_array, square_size=1, shape='c', theta=0, save=False):
         'Plots an r vs t graph and the simulated minicircles'
         #setup subplots and axis
         fig, ax = plt.subplots(1,2, figsize=(11,5))
@@ -35,12 +35,20 @@ class Plots():
         else: # plot single circle
             ax[0].plot(xyrt_array[:,3], xyrt_array[:,2])
             ax[1].scatter(0,0, label='centre')
-            ax[1].plot(np.cos(xyrt_array[:,3]), np.sin(xyrt_array[:,3]), 'k--', label='circle')
-            ax[1].plot(xyrt_array[:,0], xyrt_array[:,1], label = 'distorted circle')
+            if shape == 'c':
+                ax[1].plot(np.cos(xyrt_array[:,3]), np.sin(xyrt_array[:,3]), 'k--', label='circle')
+                ax[1].plot(xyrt_array[:,0], xyrt_array[:,1], label = 'distorted circle')
+            else:
+                fig8_x = np.sin(xyrt_array[:,3])
+                fig8_y = np.sin(xyrt_array[:,3])*np.cos(xyrt_array[:,3])
+                rot_fig8_x = fig8_x*np.cos(theta)+fig8_y*np.sin(theta)
+                rot_fig8_y = fig8_y*np.cos(theta)-1*fig8_x*np.sin(theta)
+                ax[1].plot(rot_fig8_x, rot_fig8_y, 'k--', label='fig-8')
+                ax[1].plot(xyrt_array[:,0], xyrt_array[:,1], label = 'distorted fig-8')
             ax[1].legend(loc='upper right')
         plt.show()
         if save:
-            fig.savefig('Noise_comparison')
+            fig.savefig('Minicircle Gen')
         return
     
     def plot_noise_comp(noise_array, sim_noise, save=False):
@@ -70,7 +78,7 @@ class Plots():
             plt.savefig('Noise-Fast_vs_Slow')
         return
         
-    def plot_circle_comp(gf_grid, tot_grid, real_noise_grid, save=False):
+    def plot_circle_comp(gf_grid, tot_grid, real_noise_grid, xy_array, save=False):
         'plots clean / sim noise / noise circles and slice distribution'
         fig, ax = plt.subplots(3,3, figsize=(15,11), tight_layout=True)
         fig.suptitle('Simulated Minicircle Noise Comparison: clean/simulated noise/real noise')
@@ -90,14 +98,14 @@ class Plots():
                 ax[i,0].plot(xy_array[j,:,1],xy_array[j,:,0])
                 ax[i,0].set_xlim(0,512)
                 ax[i,0].set_ylim(512,0)
-            ax[i,1].plot(np.linspace(10,500,3), [194,194,194])
-            ax[i,1].plot([419,419,419], np.linspace(10,500,3), color='orange')
-        ax[0,2].plot(gf_grid[194,:],label='Row heights')
-        ax[0,2].plot(gf_grid[:,419], label='Column heights', color='orange')
-        ax[1,2].plot(tot_grid[194,:],label='Row heights')
-        ax[1,2].plot(tot_grid[:,419], label='Column heights', color='orange')
-        ax[2,2].plot(real_noise_grid[194,:],label='Row heights')
-        ax[2,2].plot(real_noise_grid[:,419], label='Column heights', color='orange')
+            ax[i,1].plot(np.linspace(10,500,3), [40,40,40])
+            ax[i,1].plot([210,210,210], np.linspace(10,500,3), color='orange')
+        ax[0,2].plot(gf_grid[40,:],label='Row heights')
+        ax[0,2].plot(gf_grid[:,210], label='Column heights', color='orange')
+        ax[1,2].plot(tot_grid[40,:],label='Row heights')
+        ax[1,2].plot(tot_grid[:,210], label='Column heights', color='orange')
+        ax[2,2].plot(real_noise_grid[40,:],label='Row heights')
+        ax[2,2].plot(real_noise_grid[:,210], label='Column heights', color='orange')
         plt.show()
         if save:
             fig.savefig('simicircles_gaussian_filtered_noisy_comparison')
@@ -112,30 +120,73 @@ def contour_length(x, y):
         cont_len += ((x[i]-x[i+1])**2+(y[i]-y[i+1])**2)**0.5
     return cont_len
 
+def calc_radius(xyrt_array):
+    'Calculates the radius from (0,0) to the curve'
+    l = len(xyrt_array)
+    new_r = np.zeros((l))
+    for i in range(l):
+        new_r[i] += np.sqrt(xyrt_array[i,0]**2 + xyrt_array[i,1]**2)
+    return new_r
 
-def create_rand_circle(H=15, size_limit=1, no_points=101, log_rng=(-0.5,-2.5)):
-    # H is the number of circles you will sum to produce the distored circles
-    # Randomize amplitude and phase
-    amp = (np.multiply(np.random.rand(1,H)-0.5, np.logspace(log_rng[0],log_rng[1],H))).T
-    phase = np.random.rand(1,H).T * 2*np.pi
-    # Accumulate r(t) over 2*pi
-    t = np.linspace(0,2*np.pi, no_points)
-    r = np.ones(t.size)
-    for h in range(H):
-      r += amp[h]*np.sin(h*t+phase[h])
-    # ensure smaller circles become roughly the same size as larger ones 
-    r *= size_limit/max(r) + 0.1*size_limit*np.random.rand()
-    # Reconstruct x(t), y(t)
-    x = r * np.cos(t)
-    y = r * np.sin(t)
-    return np.asarray([x,y,r,t]).T
+def rotate_coords(xyrt_array, theta=0):
+    'Rotates the coords and therefore the molecule shape by theat radians'
+    rot_x = xyrt_array[:,0]*np.cos(theta)+xyrt_array[:,1]*np.sin(theta)
+    rot_y = xyrt_array[:,1]*np.cos(theta)-1*xyrt_array[:,0]*np.sin(theta)
+    xyrt_array[:,0] = rot_x
+    xyrt_array[:,1] = rot_y
+    return xyrt_array
+    
 
-def arrange_circles(no_circle, square_size=512, H=10, size_limit=50, no_points=101, log_rng=(0,-1.5)):
+class Gen_mol():
+    'Generates molecules of different shapes'
+    
+    def circle(H=15, size_limit=1, no_points=101, log_rng=(-0.5,-2.5)):
+        # H is the number of circles you will sum to produce the distored circles
+        # Randomize amplitude and phase
+        amp = (np.multiply(np.random.rand(1,H)-0.5, np.logspace(log_rng[0],log_rng[1],H))).T
+        phase = np.random.rand(1,H).T * 2*np.pi
+        # Accumulate r(t) over 2*pi
+        t = np.linspace(0,2*np.pi, no_points)
+        r = np.ones(t.size)
+        for h in range(H):
+          r += amp[h]*np.sin(h*t+phase[h])
+        # ensure smaller circles become roughly the same size as larger ones 
+        r *= size_limit/max(r) + 0.1*size_limit*np.random.rand()
+        # Reconstruct x(t), y(t)
+        x = r * np.cos(t)
+        y = r * np.sin(t)
+        return np.asarray([x,y,r,t]).T
+    
+    def fig8(H=15, size_limit=1, no_points=101, log_rng=(-0,-2)):
+        # H is the number of circles you will sum to produce the distored circles
+        # Randomize amplitude and phase
+        amp = (np.multiply(np.random.rand(1,H)-0.5, np.logspace(log_rng[0],log_rng[1],H))).T
+        phase = np.random.rand(1,H).T * 2*np.pi
+        # Accumulate r(t) over 2*pi
+        t = np.linspace(0,2*np.pi, no_points)
+        r = np.ones(t.size)
+        for h in range(H):
+          r += amp[h]*np.sin(h*t+phase[h])
+        # ensure smaller circles become roughly the same size as larger ones 
+        r *= size_limit/max(r) + 0.1*size_limit*np.random.rand()
+        # Reconstruct x(t), y(t)
+        x = r * np.sin(t)
+        y = r * np.sin(t)*np.cos(t)
+        # make r the actual radius
+        xyrt_array = np.asarray([x,y,r,t]).T
+        xyrt_array[:,2] = calc_radius(xyrt_array) 
+        return xyrt_array
+
+def arrange_shapes(no_circle, square_size=512, H=10, size_limit=50, no_points=101, circ_log_rng=(0,-1.5), fig8_log_rng=(0,-1.5)):
     'Generates multiple distorted circles on a canvas'
     array = np.zeros((no_circle, no_points, 4)) # create empty array to add to later
     for i in range(no_circle):
-        # generate a circle
-        xyrt_array = create_rand_circle(H=H, size_limit=size_limit, no_points=no_points, log_rng=log_rng)
+        # generate a circle or fig8
+        if np.random.rand() < 0.5:
+            xyrt_array = Gen_mol.circle(H=H, size_limit=size_limit, no_points=no_points, log_rng=circ_log_rng)
+        else:
+            xyrt_array = Gen_mol.fig8(H=H, size_limit=size_limit, no_points=no_points, log_rng=fig8_log_rng)
+            xyrt_array = rotate_coords(xyrt_array, theta=np.random.rand()*np.pi)
         # adds a bias to the new random centres
         rand_centre_x = np.random.randint(-10,square_size+10) 
         rand_centre_y = np.random.randint(-10,square_size+10)
@@ -144,7 +195,6 @@ def arrange_circles(no_circle, square_size=512, H=10, size_limit=50, no_points=1
         print('Mol %i contour length: %.3f' %(i, contour_length(xyrt_array[:,0], xyrt_array[:,1])))
         # put coords into array
         array[i] += xyrt_array
-    plt.show()
     return array
 
 def skeletonise(xy_array):
@@ -152,16 +202,15 @@ def skeletonise(xy_array):
     xy_copy = xy_array.copy()
     xy_copy[0] = np.round(xy_copy[0])
     xy_copy[0] = np.round(xy_copy[0])
-    return xy_copy
+    return xy_copy.astype(np.int64)
 
 def gridify(xy_array, grid_size, grid_ext=10):
     'Turn the skeletonised array to a numpy grid'
-    arr_max = int(np.max(xy_array))+1
-    grid = np.zeros((arr_max, arr_max))
+    grid = np.zeros((grid_size, grid_size))
     for mol_xy in xy_array:
         for idx in range(len(mol_xy[:,0])):
             grid[int(mol_xy[idx,0]),int(mol_xy[idx,1])] = 1
-    return grid[0:grid_size,0:grid_size]
+    return grid
 
 def apply_gaussian(skelly_grid, double=True):
     'Applies a gaussian filter to smooth out the skeletonised grid'
@@ -188,26 +237,36 @@ def gen_noise(image, noise_out_shape, plot=False, save_plot=False):
         Plots.plot_fast_slow_noise(fast_noise_image, (fast_mean,fast_std), slow_noise_image, (slow_mean,slow_std), save=save_plot)
     return tot_noise
 
+# To plot a single shape
+'''
+f = Gen_mol.fig8()
+theta = np.random.rand()
+rotate_coords(f, theta)
+Plots.plot_xyrt(f,shape='8',theta=theta)
+'''
+# To plot a few shapes
+'''
+array = arrange_shapes(5, H=10, no_points=301)
+Plots.plot_xyrt(array, square_size=512)
+'''
+#To plot a few shapes with noise
 
-array = arrange_circles(5, H=10, no_points=301, log_rng=(0, -1.5))
-
-#a = create_rand_circle()
-
-
-noise_image = '/Users/Maxgamill/Desktop/Uni/PhD/Project/Results/Simdata/noise.txt'
-noise_array = np.loadtxt(noise_image)*1e9 # convert from nm
-
-xy_array = array[:,:,0:2]
+array = arrange_shapes(5, H=10, no_points=301) #simulate shapes
+xy_array = array[:,:,0:2] # get only xy coords from xyrt array
 skelly = skeletonise(xy_array)
-grid = gridify(skelly, 512)
+grid = gridify(skelly, 512) # assign skeletons to grid
 
-gf_grid = apply_gaussian(grid)
+gf_grid = apply_gaussian(grid) # apply gaussian filter to 
 gf_grid[gf_grid!=0] = gf_grid[gf_grid!=0] * 2 # DNA should be 2nm
+
+noise_image = '/Users/Maxgamill/Desktop/Uni/PhD/Project/Results/Simdata/noise.txt' #get noise example
+noise_array = np.loadtxt(noise_image)*1e9 # convert from nm
 sim_noise = gen_noise(noise_array, grid.shape)
 
-tot_grid = gf_grid + sim_noise
+tot_grid = gf_grid + sim_noise 
 real_noise_grid = gf_grid + noise_array
 
+Plots.plot_circle_comp(gf_grid, tot_grid, real_noise_grid, xy_array, save=False)
 
 
 
