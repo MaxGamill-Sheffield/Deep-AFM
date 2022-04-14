@@ -112,30 +112,52 @@ def contour_length(x, y):
         cont_len += ((x[i]-x[i+1])**2+(y[i]-y[i+1])**2)**0.5
     return cont_len
 
-
-def create_rand_circle(H=15, size_limit=1, no_points=101, log_rng=(-0.5,-2.5)):
-    # H is the number of circles you will sum to produce the distored circles
-    # Randomize amplitude and phase
-    amp = (np.multiply(np.random.rand(1,H)-0.5, np.logspace(log_rng[0],log_rng[1],H))).T
-    phase = np.random.rand(1,H).T * 2*np.pi
-    # Accumulate r(t) over 2*pi
-    t = np.linspace(0,2*np.pi, no_points)
-    r = np.ones(t.size)
-    for h in range(H):
-      r += amp[h]*np.sin(h*t+phase[h])
-    # ensure smaller circles become roughly the same size as larger ones 
-    r *= size_limit/max(r) + 0.1*size_limit*np.random.rand()
-    # Reconstruct x(t), y(t)
-    x = r * np.cos(t)
-    y = r * np.sin(t)
-    return np.asarray([x,y,r,t]).T
+class Gen_mol():
+    'Generates molecules of different shapes'
+    def circle(H=15, size_limit=1, no_points=101, log_rng=(-0.5,-2.5)):
+        # H is the number of circles you will sum to produce the distored circles
+        # Randomize amplitude and phase
+        amp = (np.multiply(np.random.rand(1,H)-0.5, np.logspace(log_rng[0],log_rng[1],H))).T
+        phase = np.random.rand(1,H).T * 2*np.pi
+        # Accumulate r(t) over 2*pi
+        t = np.linspace(0,2*np.pi, no_points)
+        r = np.ones(t.size)
+        for h in range(H):
+          r += amp[h]*np.sin(h*t+phase[h])
+        # ensure smaller circles become roughly the same size as larger ones 
+        r *= size_limit/max(r) + 0.1*size_limit*np.random.rand()
+        # Reconstruct x(t), y(t)
+        x = r * np.cos(t)
+        y = r * np.sin(t)
+        return np.asarray([x,y,r,t]).T
+    
+    def fig8(H=15, size_limit=1, no_points=101, log_rng=(-0,-2)):
+        # H is the number of circles you will sum to produce the distored circles
+        # Randomize amplitude and phase
+        amp = (np.multiply(np.random.rand(1,H)-0.5, np.logspace(log_rng[0],log_rng[1],H))).T
+        phase = np.random.rand(1,H).T * 2*np.pi
+        # Accumulate r(t) over 2*pi
+        t = np.linspace(0,2*np.pi, no_points)
+        r = np.ones(t.size)
+        for h in range(H):
+          r += amp[h]*np.sin(h*t+phase[h])
+        # ensure smaller circles become roughly the same size as larger ones 
+        r *= size_limit/max(r) + 0.1*size_limit*np.random.rand()
+        # Reconstruct x(t), y(t)
+        x = r * np.sin(t)
+        y = r * np.sin(t)*np.cos(t)
+        # roate randomly between 0 an pi
+        theta = np.random.rand()*np.pi
+        rot_x = x*np.cos(theta)+y*np.sin(theta)
+        rot_y = y*np.cos(theta)-1*x*np.sin(theta)
+        return np.asarray([rot_x,rot_y,r,t]).T
 
 def arrange_circles(no_circle, square_size=512, H=10, size_limit=50, no_points=101, log_rng=(0,-1.5)):
     'Generates multiple distorted circles on a canvas'
     array = np.zeros((no_circle, no_points, 4)) # create empty array to add to later
     for i in range(no_circle):
         # generate a circle
-        xyrt_array = create_rand_circle(H=H, size_limit=size_limit, no_points=no_points, log_rng=log_rng)
+        xyrt_array = Gen_mol.circle(H=H, size_limit=size_limit, no_points=no_points, log_rng=log_rng)
         # adds a bias to the new random centres
         rand_centre_x = np.random.randint(-10,square_size+10) 
         rand_centre_y = np.random.randint(-10,square_size+10)
@@ -208,6 +230,6 @@ sim_noise = gen_noise(noise_array, grid.shape)
 tot_grid = gf_grid + sim_noise
 real_noise_grid = gf_grid + noise_array
 
-
+Plots.plot_circle_comp(gf_grid, tot_grid, real_noise_grid)
 
 
